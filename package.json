@@ -1,0 +1,15 @@
+{
+  "name": "b-socio-website",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "check": "node src/check.mjs",
+    "test": "npm run build && npm run check",
+    "dev": "node src/build.mjs && node src/dev.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

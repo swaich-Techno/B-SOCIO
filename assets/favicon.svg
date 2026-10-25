@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="B Socio">
+  <rect width="64" height="64" rx="10" fill="#131510"/>
+  <path d="M19 14h17c9 0 14 4 14 11 0 4-2 8-6 9 5 1 8 5 8 11 0 9-6 14-17 14H19V14Zm15 17c5 0 7-2 7-5s-2-5-7-5h-6v10h6Zm1 20c5 0 8-2 8-6 0-5-3-7-8-7h-7v13h7Z" fill="#f2efe6"/>
+  <circle cx="52" cy="12" r="5" fill="#f15a3b"/>
+</svg>
