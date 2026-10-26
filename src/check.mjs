@@ -76,6 +76,18 @@ async function localTargetFile(reference, currentFile) {
 const files = await collectFiles(outputDirectory);
 const htmlFiles = files.filter((file) => file.endsWith('.html'));
 const documents = new Map(await Promise.all(htmlFiles.map(async (file) => [file, await readFile(file, 'utf8')])));
+const removedProject = /rehmat/i;
+
+if (htmlFiles.length !== 11) report(outputDirectory, `expected 11 HTML pages, found ${htmlFiles.length}`);
+
+for (const file of files) {
+  const relativeFile = path.relative(outputDirectory, file);
+  if (removedProject.test(relativeFile)) report(file, 'removed Rehmat Panjab asset is still published');
+  if (/\.(html|xml|txt|css|js|svg)$/i.test(file)) {
+    const text = documents.get(file) ?? await readFile(file, 'utf8');
+    if (removedProject.test(text)) report(file, 'contains removed Rehmat Panjab content');
+  }
+}
 const records = htmlFiles.map((file) => {
   const html = documents.get(file);
   return {
