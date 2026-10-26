@@ -6,31 +6,52 @@ const sourceDirectory = path.dirname(fileURLToPath(import.meta.url));
 const rootDirectory = path.resolve(sourceDirectory, '..');
 const outputDirectory = path.join(rootDirectory, 'dist');
 const canonicalOrigin = 'https://www.bsocio.in';
-const imagePath = '/assets/images/projects/rehmat-panjab-homepage.png';
 
 const escapeJson = (value) => JSON.stringify(value).replaceAll('<', '\\u003c');
 
+function decorativeQr() {
+  const rows = ['111111101', '100000101', '101110101', '101110101', '100000101', '111111101', '000000000', '110101011', '101000111'];
+  return rows.map((row) => [...row].map((bit) => `<i${bit === '1' ? ' class="on"' : ''}></i>`).join('')).join('');
+}
+
+const phoneDisplay = '+91 70094 64475';
+const whatsappUrl = 'https://wa.me/917009464475';
+
 const navigation = [
-  ['/', 'Home'],
   ['/services', 'Services'],
   ['/work', 'Work'],
   ['/about', 'About'],
+  ['/contact', 'Contact'],
 ];
+
+const serviceSectionPaths = new Set(['/services', '/websites', '/automations', '/qr-ar-studio']);
+
+function navCurrent(href, currentPath) {
+  if (href === '/services' && serviceSectionPaths.has(currentPath)) {
+    return currentPath === href ? 'page' : 'true';
+  }
+  if (href === '/work' && (currentPath === '/work' || currentPath.startsWith('/work/'))) {
+    return currentPath === href ? 'page' : 'true';
+  }
+  return currentPath === href ? 'page' : '';
+}
 
 function header(currentPath) {
   return `
     <header class="site-header">
       <div class="container nav-shell">
         <a class="brand" href="/" aria-label="B Socio home">
-          <span class="brand-mark" aria-hidden="true">B</span>
-          <span class="brand-copy"><strong>B Socio</strong><small>Design + Development</small></span>
+          <img class="brand-mark" src="/assets/logo-b-socio.png" width="1759" height="463" alt="B Socio">
         </a>
         <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-navigation" aria-label="Open navigation" data-menu-button>
           <span aria-hidden="true"></span><span aria-hidden="true"></span>
         </button>
         <nav class="main-nav" id="site-navigation" aria-label="Main navigation" data-menu data-open="false">
-          ${navigation.map(([href, label]) => `<a href="${href}"${currentPath === href ? ' aria-current="page"' : ''}>${label}</a>`).join('')}
-          <a class="button button--small" href="/contact"${currentPath === '/contact' ? ' aria-current="page"' : ''}>Start a Project</a>
+          ${navigation.map(([href, label]) => {
+            const current = navCurrent(href, currentPath);
+            return `<a href="${href}"${current ? ` aria-current="${current}"` : ''}>${label}</a>`;
+          }).join('')}
+          <a class="button" href="/contact"${currentPath === '/contact' ? ' aria-current="page"' : ''}>Start a project</a>
         </nav>
       </div>
     </header>`;
@@ -43,8 +64,7 @@ function footer() {
         <div class="footer-grid">
           <div class="footer-intro">
             <a class="brand" href="/" aria-label="B Socio home">
-              <span class="brand-mark" aria-hidden="true">B</span>
-              <span class="brand-copy"><strong>B Socio</strong><small>Design + Development</small></span>
+              <img class="brand-mark" src="/assets/logo-b-socio.png" width="1759" height="463" alt="B Socio">
             </a>
             <p>Human-led websites, ecommerce experiences and practical automations for growing businesses in Punjab and beyond.</p>
           </div>
@@ -61,9 +81,8 @@ function footer() {
             <h2>Connect</h2>
             <ul>
               <li><a href="mailto:connect@bsocio.in">connect@bsocio.in</a></li>
-              <li><a href="https://wa.me/919781580475" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+              <li><a href="${whatsappUrl}" target="_blank" rel="noopener noreferrer">WhatsApp · ${phoneDisplay}</a></li>
               <li><a href="https://ar.bsocio.in" target="_blank" rel="noopener noreferrer">B Socio AR</a></li>
-              <li><a href="https://studio.bsocio.in" target="_blank" rel="noopener noreferrer">Studio Login</a></li>
               <li><a href="/privacy">Privacy</a></li>
             </ul>
           </nav>
@@ -82,7 +101,6 @@ function page({
   pathName,
   body,
   schema,
-  preloadImage = false,
   pageClass = '',
   robots = 'index, follow',
   ogType = 'website',
@@ -99,12 +117,11 @@ function page({
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f2efe6">
+    <meta name="theme-color" content="#f5f4f0">
     <meta name="description" content="${description}">
     <meta name="robots" content="${robots}">
     <link rel="canonical" href="${canonical}">
     <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-    ${preloadImage ? `<link rel="preload" as="image" href="${imagePath}">` : ''}
     <meta property="og:type" content="${ogType}">
     <meta property="og:site_name" content="B Socio">
     <meta property="og:title" content="${fullTitle}">
@@ -139,8 +156,8 @@ const organizationSchema = {
   name: 'B Socio',
   url: canonicalOrigin,
   email: 'connect@bsocio.in',
-  telephone: '+91 97815 80475',
-  logo: `${canonicalOrigin}/assets/favicon.svg`,
+  telephone: '+917009464475',
+  logo: `${canonicalOrigin}/assets/logo-b-socio.png`,
   areaServed: 'India',
   address: {
     '@type': 'PostalAddress',
@@ -151,264 +168,477 @@ const organizationSchema = {
 
 const home = page({
   title: 'B Socio — Websites, Ecommerce & Business Automation',
-  description: 'B Socio designs distinctive websites, ecommerce experiences and practical business automations for growing businesses.',
+  description: 'B Socio designs websites that attract attention and automation systems that keep the work moving.',
   pathName: '/',
-  preloadImage: true,
+  pageClass: 'page-home',
   schema: organizationSchema,
   body: `
-    <section class="container hero" aria-labelledby="home-title">
-      <div class="hero-copy">
-        <p class="eyebrow">Independent digital studio · Punjab</p>
-        <h1 id="home-title">Distinct websites. <em>Simpler business workflows.</em></h1>
-        <p class="hero-lede">We design and build websites, ecommerce experiences, and practical automations for growing businesses.</p>
-        <div class="button-row">
-          <a class="button" href="/work">Explore Our Work</a>
-          <a class="button button--outline" href="/contact">Start a Project</a>
-        </div>
-      </div>
-      <figure class="hero-project">
-        <a href="/work/rehmat-panjab" aria-label="Read the Rehmat Panjab case study">
-          <img src="${imagePath}" width="1265" height="713" alt="Rehmat Panjab ecommerce homepage featuring Oud Rose perfume oil" decoding="async" fetchpriority="high">
-        </a>
-        <figcaption><span>New in the portfolio · Rehmat Panjab</span><span>Ecommerce / Fragrance</span></figcaption>
-      </figure>
-    </section>
-
-    <section class="section section--dark" aria-labelledby="featured-title">
-      <div class="container">
-        <div class="section-heading" data-reveal>
-          <div><p class="eyebrow">01 · Featured Work</p><h2 id="featured-title">A fragrance house, made discoverable.</h2></div>
-          <div><p>Real work leads the portfolio. Rehmat Panjab brings product discovery, brand storytelling and a curated collection of concentrated perfume oils together.</p></div>
-        </div>
-        <article class="featured-grid" data-reveal>
-          <div class="featured-copy">
-            <p class="eyebrow">Live Project</p>
-            <h3>Rehmat Panjab</h3>
-            <p>An editorial ecommerce experience built around mood, fragrance notes, testers and guided discovery.</p>
-            <div class="project-meta"><span>Ecommerce</span><span>Brand Experience</span><span>Next.js</span></div>
-            <div class="button-row">
-              <a class="button button--light" href="/work/rehmat-panjab">Read Case Study</a>
-              <a class="text-link" href="https://www.rehmatpanjab.com" target="_blank" rel="noopener noreferrer">View Live Website <span class="arrow" aria-hidden="true">↗</span></a>
-            </div>
+    <section class="hero-home" aria-labelledby="home-title">
+      <div class="container hero-home-grid">
+        <div>
+          <p class="eyebrow">Websites + AI automation</p>
+          <h1 id="home-title">From click to outcome.</h1>
+          <p class="lede">We design websites that attract attention—and automation systems that keep the work moving.</p>
+          <div class="button-row">
+            <a class="button" href="/contact">Start a project <span aria-hidden="true">↗</span></a>
+            <a class="button-ghost" href="/work">See our work</a>
           </div>
-          <figure class="project-media">
-            <a href="/work/rehmat-panjab" aria-label="Read the Rehmat Panjab case study"><img src="${imagePath}" width="1265" height="713" alt="Rehmat Panjab ecommerce homepage featuring Oud Rose perfume oil" loading="lazy" decoding="async"></a>
-            <figcaption><span>Live ecommerce experience</span><span>Rehmat Panjab</span></figcaption>
-          </figure>
-        </article>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="services-title">
-      <div class="container">
-        <div class="section-heading" data-reveal>
-          <div><p class="eyebrow">02 · Services</p><h2 id="services-title">Built around the customer experience—and the work behind it.</h2></div>
-          <div><p>Start with one focused need or connect the website, workflow and growth systems into a coherent whole.</p></div>
         </div>
-        <ol class="service-index" data-reveal>
-          <li><h3>Website Development &amp; Ecommerce</h3><p>Distinctive business sites, storefronts, landing pages and web applications designed to work across every screen.</p><a href="/websites" aria-label="Explore website development and ecommerce">↗</a></li>
-          <li><h3>AI &amp; Business Automation</h3><p>Useful assistants, enquiry flows, follow-ups, reporting and connected workflows—with a clear path back to a person.</p><a href="/automations" aria-label="Explore AI and business automation">↗</a></li>
-          <li><h3>Branding &amp; Digital Growth</h3><p>Visual direction, campaign pages, content systems, paid ads and WhatsApp marketing for a more coherent presence.</p><a href="/services#growth" aria-label="Explore branding and digital growth">↗</a></li>
-          <li><h3>QR/AR Experiences</h3><p>Practical interactive previews for products, spaces, menus, catalogues, packaging and events.</p><a href="/qr-ar-studio" aria-label="Explore QR and AR experiences">↗</a></li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="section section--dark" aria-labelledby="process-title">
-      <div class="container">
-        <div class="section-heading" data-reveal>
-          <div><p class="eyebrow">03 · How We Work</p><h2 id="process-title">Clear decisions. Reviewable stages.</h2></div>
-          <div><p>Every engagement is shaped around the business, audience and constraints—not a fixed package disguised as discovery.</p></div>
-        </div>
-        <ol class="process-list" data-reveal>
-          <li><span>01</span><h3>Discover</h3><p>Clarify the audience, business need, existing tools and useful constraints.</p></li>
-          <li><span>02</span><h3>Define</h3><p>Agree on scope, approach, responsibilities and review milestones before building.</p></li>
-          <li><span>03</span><h3>Make</h3><p>Design and develop in reviewable stages, testing decisions as the experience takes shape.</p></li>
-          <li><span>04</span><h3>Launch</h3><p>Complete quality checks, prepare handover and support the agreed release path.</p></li>
-        </ol>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="about-title">
-      <div class="container about-split" data-reveal>
-        <h2 id="about-title">Useful digital work, without the theatre.</h2>
-        <div class="about-copy">
-          <p>B Socio is an independent digital studio in Punjab, India. We bring design, development, automation and digital growth into one practical working relationship.</p>
-          <p>We stay honest about what is live, what needs access and what still needs to be decided.</p>
-          <a class="text-link" href="/about">About B Socio <span class="arrow" aria-hidden="true">↗</span></a>
+        <div class="hero-stage" data-draw-stage>
+          <svg class="hero-ribbon" viewBox="0 0 640 420" fill="none" aria-hidden="true">
+            <path data-draw d="M150 250 C 250 250, 300 90, 560 78" stroke="#2f6bff" stroke-width="18" stroke-linecap="round"/>
+          </svg>
+          <div class="browser-card">
+            <div class="browser-top" aria-hidden="true"><span></span><span></span><span></span></div>
+            <div class="browser-shot" aria-hidden="true"></div>
+            <div class="browser-lines" aria-hidden="true"><span></span><span></span><span></span></div>
+            <span class="browser-action">Start</span>
+          </div>
+          <ul class="outcome-list">
+            <li class="outcome-card"><span class="icon-bubble" aria-hidden="true">✉</span><div><strong>Follow-up</strong><p>The enquiry leaves the page with a next step.</p></div></li>
+            <li class="outcome-card"><span class="icon-bubble" aria-hidden="true">▦</span><div><strong>Schedule</strong><p>A time can be offered without another chase.</p></div></li>
+            <li class="outcome-card"><span class="icon-bubble" aria-hidden="true">✓</span><div><strong>Done</strong><p>The team can see the action close.</p></div></li>
+          </ul>
         </div>
       </div>
     </section>
-
-    <section class="section--signal" aria-labelledby="contact-cta-title">
-      <div class="container cta-band" data-reveal>
-        <h2 id="contact-cta-title">Have something useful to build?</h2>
-        <div><p>Tell us what the business needs, where the friction is and what a good outcome should make easier.</p><div class="button-row"><a class="button" href="/contact">Start a Project</a></div></div>
+    <nav class="service-strip" aria-label="Primary services">
+      <a href="/websites"><span class="icon-bubble" aria-hidden="true">▣</span> Web Design</a>
+      <a href="/automations"><span class="icon-bubble" aria-hidden="true">⚙</span> AI Automation</a>
+      <a href="/qr-ar-studio"><span class="icon-bubble" aria-hidden="true">⧉</span> QR + AR</a>
+    </nav>
+    <section class="band band--dark" aria-labelledby="system-title">
+      <div class="container system-grid">
+        <div>
+          <p class="eyebrow">The B Socio system</p>
+          <h2 id="system-title">Built to keep moving.</h2>
+          <p class="lede">Attract attention. Capture intent. Automate the follow-through.</p>
+        </div>
+        <div class="system-cards">
+          <article class="system-card"><span>Website</span><h3>A clear first click</h3><p>Pages arranged around the decision a visitor needs to make.</p></article>
+          <article class="system-card"><span>Enquiry</span><h3>A recorded ask</h3><p>Requests that arrive with enough context to review.</p></article>
+          <article class="system-card"><span>Action</span><h3>A visible next step</h3><p>Routing, reminders and handoff back to a person.</p></article>
+        </div>
       </div>
     </section>`,
 });
 
 const services = page({
   title: 'Services',
-  description: 'Website development, ecommerce, AI automation, branding, digital growth and QR/AR services from B Socio.',
+  description: 'Websites, AI automation, branding and QR/AR from B Socio, connected as one practical system.',
   pathName: '/services',
+  pageClass: 'page-services',
   body: `
-    <section class="container page-hero">
-      <div><p class="eyebrow">Services</p><h1>One studio. Four connected capabilities.</h1></div>
-      <div><p>Build the customer-facing experience, improve the workflow behind it, or connect both around a clear business need.</p></div>
+    <section class="page-intro" aria-labelledby="services-title">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Services</p>
+          <h1 id="services-title">Everything digital, working together.</h1>
+          <p class="lede">Websites, AI automation and QR + AR, built to attract, engage and keep things moving. One connected system. Real outcomes.</p>
+          <div class="button-row">
+            <a class="button" href="/contact">Start a project <span aria-hidden="true">↗</span></a>
+            <a class="button-ghost" href="/work">See our work</a>
+          </div>
+        </div>
+        <div class="path-map" data-draw-stage>
+          <svg class="path-ribbon" viewBox="0 0 640 520" fill="none" aria-hidden="true">
+            <path data-draw d="M120 260 C 220 260, 250 90, 390 90" stroke="#2f6bff" stroke-width="14" stroke-linecap="round"/>
+            <path data-draw d="M120 260 C 230 260, 260 260, 390 260" stroke="#2f6bff" stroke-width="14" stroke-linecap="round"/>
+            <path data-draw d="M120 260 C 220 260, 250 430, 390 430" stroke="#2f6bff" stroke-width="14" stroke-linecap="round"/>
+          </svg>
+          <img class="path-hub" src="/assets/logo-b-socio.png" width="1759" height="463" alt="">
+          <ol class="path-list">
+            <li><a class="path-card" href="/websites"><p class="eyebrow">01</p><h2>Websites</h2><p>Presence, story and a clear next action.</p></a></li>
+            <li><a class="path-card" href="/automations"><p class="eyebrow">02</p><h2>AI Automation</h2><p>Enquiry, follow-up and a path back to a person.</p></a></li>
+            <li><a class="path-card" href="/qr-ar-studio"><p class="eyebrow">03</p><h2>QR + AR</h2><p>A physical moment that opens a digital layer.</p></a></li>
+          </ol>
+        </div>
+      </div>
     </section>
-    <div class="container">
-      <section class="service-detail" id="websites" aria-labelledby="websites-title" data-reveal>
-        <header><p class="eyebrow">01 · Digital Products</p><h2 id="websites-title">Website Development &amp; Ecommerce</h2></header>
-        <div><p>Business websites, ecommerce storefronts, campaign pages and custom interfaces with clear content hierarchy, responsive behavior and technical SEO foundations.</p><ul class="plain-list"><li>UX, content structure and visual direction</li><li>Responsive frontend development</li><li>Ecommerce and product-discovery experiences</li><li>Landing pages, booking journeys and custom web apps</li><li>Deployment, testing and handover</li></ul><a class="text-link" href="/websites">Explore Websites <span class="arrow" aria-hidden="true">↗</span></a></div>
-      </section>
-      <section class="service-detail" id="automation" aria-labelledby="automation-title" data-reveal>
-        <header><p class="eyebrow">02 · Operations</p><h2 id="automation-title">AI &amp; Business Automation</h2></header>
-        <div><p>Practical workflows for enquiries, reminders, reporting and knowledge access. Every provider connection is reviewed for permissions, reliability and cost before it is promised.</p><ul class="plain-list"><li>Workflow discovery and process mapping</li><li>AI assistants with human handoff</li><li>Enquiry qualification and routing</li><li>CRM, calendar and messaging integrations after review</li><li>Custom dashboards and internal tools</li></ul><a class="text-link" href="/automations">Explore Automation <span class="arrow" aria-hidden="true">↗</span></a></div>
-      </section>
-      <section class="service-detail" id="growth" aria-labelledby="growth-title" data-reveal>
-        <header><p class="eyebrow">03 · Brand</p><h2 id="growth-title">Branding &amp; Digital Growth</h2></header>
-        <div><p>A coherent visual presence and practical campaign support for businesses that need to be easier to recognize, understand and contact.</p><ul class="plain-list"><li>Brand colors, identity direction and digital systems</li><li>Social media planning and management</li><li>Reels, short video concepts and edits</li><li>Posters, menus, product and campaign creative</li><li>Paid social campaigns and WhatsApp marketing</li></ul></div>
-      </section>
-      <section class="service-detail" id="immersive" aria-labelledby="immersive-title" data-reveal>
-        <header><p class="eyebrow">04 · Interactive</p><h2 id="immersive-title">QR/AR Experiences</h2></header>
-        <div><p>Interactive, scan-to-open experiences where a spatial or visual preview genuinely helps the customer understand the offer.</p><ul class="plain-list"><li>Product and packaging experiences</li><li>Menus and catalogues</li><li>Furniture and real-estate previews</li><li>Event and campaign activations</li></ul><a class="text-link" href="/qr-ar-studio">Explore QR/AR <span class="arrow" aria-hidden="true">↗</span></a></div>
-      </section>
-    </div>
-    <section class="section--signal"><div class="container cta-band"><h2>Not sure where the project starts?</h2><div><p>Describe the business problem. We will help identify whether the useful first step is a website, a workflow or a smaller focused improvement.</p><div class="button-row"><a class="button" href="/contact">Start a Conversation</a></div></div></div></section>`,
+    <section class="benefit-row" aria-label="How the services connect">
+      <article class="benefit"><h2>One connected system</h2><p>Web, automation and physical touchpoints can be planned together.</p></article>
+      <article class="benefit"><h2>From attention to action</h2><p>Attract, engage and keep the next step visible.</p></article>
+      <article class="benefit"><h2>Built for real outcomes</h2><p>Scope follows the business need. Results are published only when they are real.</p></article>
+    </section>
+    <section class="stack container" aria-labelledby="start-title">
+      <div class="section-head"><h2 id="start-title">Choose your starting point.</h2><p>Each service can stand alone, and it can also connect to the others.</p></div>
+      <div class="start-grid">
+        <article class="start-card" id="websites"><h3>Website Development &amp; Ecommerce</h3><p>Business sites, storefronts, landing pages and custom interfaces.</p><a class="text-link" href="/websites">Explore websites</a></article>
+        <article class="start-card" id="automation"><h3>AI &amp; Business Automation</h3><p>Enquiry flows, reminders and tools with a human handoff.</p><a class="text-link" href="/automations">Explore automation</a></article>
+        <article class="start-card" id="growth"><h3>Branding &amp; Digital Growth</h3><p>Identity direction, campaign creative, paid social and WhatsApp marketing.</p></article>
+        <article class="start-card" id="immersive"><h3>QR/AR Experiences</h3><p>Scan-to-open previews for products, menus, spaces, packaging and events.</p><a class="text-link" href="/qr-ar-studio">Explore QR + AR</a></article>
+      </div>
+    </section>`,
 });
 
 const websites = page({
   title: 'Website Development & Ecommerce',
-  description: 'B Socio designs and develops responsive business websites, ecommerce stores, landing pages and custom web applications.',
+  description: 'B Socio designs responsive business websites, ecommerce stores, landing pages and custom web applications.',
   pathName: '/websites',
+  pageClass: 'page-websites',
   body: `
-    <section class="page-hero--dark"><div class="container page-hero"><div><p class="eyebrow">Websites &amp; Ecommerce</p><h1>Make the website part of how the business works.</h1></div><div><p>A distinctive digital presence should also be clear, responsive, maintainable and useful to the people behind it.</p><div class="button-row"><a class="button button--light" href="/contact">Discuss a Website</a></div></div></div></section>
-    <section class="section" aria-labelledby="website-capabilities"><div class="container"><div class="section-heading"><div><p class="eyebrow">What We Build</p><h2 id="website-capabilities">From focused launches to complete storefronts.</h2></div><div><p>The scope follows the job. No framework or commerce platform is chosen before the requirements are understood.</p></div></div><div class="principles-grid"><article class="principle"><span>01</span><h3>Business Websites</h3><p>Clear positioning, services, work and contact journeys.</p></article><article class="principle"><span>02</span><h3>Ecommerce</h3><p>Product discovery, brand storytelling, merchandising and purchase paths.</p></article><article class="principle"><span>03</span><h3>Landing Pages</h3><p>Focused campaign and lead-generation experiences with one clear action.</p></article><article class="principle"><span>04</span><h3>Custom Applications</h3><p>Portals, dashboards, booking tools and purpose-built business interfaces.</p></article><article class="principle"><span>05</span><h3>Thoughtful Redesigns</h3><p>Stronger hierarchy and usability without discarding working systems by reflex.</p></article><article class="principle"><span>06</span><h3>Launch Foundations</h3><p>Responsive QA, accessibility, metadata, performance and handover.</p></article></div></div></section>
-    <section class="section section--dark" aria-labelledby="web-process"><div class="container"><div class="section-heading"><div><p class="eyebrow">Working Principles</p><h2 id="web-process">Content, craft and code stay connected.</h2></div><div><p>Design decisions are tested against the real content and implementation—not handed off as static decoration.</p></div></div><ol class="process-list"><li><span>01</span><h3>Structure</h3><p>Map the audience, pages, content and primary journeys.</p></li><li><span>02</span><h3>Direction</h3><p>Establish type, color, spacing, imagery and interaction rules.</p></li><li><span>03</span><h3>Build</h3><p>Implement responsive, semantic and maintainable interfaces.</p></li><li><span>04</span><h3>Verify</h3><p>Test links, forms, devices, metadata and launch conditions.</p></li></ol></div></section>`,
+    <section class="page-hero--dark page-intro" aria-labelledby="websites-hero">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Websites</p>
+          <h1 id="websites-hero">Websites built to move people.</h1>
+          <p class="lede">Strategic, responsive websites that attract attention and turn interest into action.</p>
+          <div class="button-row">
+            <a class="button" href="/contact">Start a project <span aria-hidden="true">↗</span></a>
+            <a class="button-ghost" href="/work">See our work</a>
+          </div>
+        </div>
+        <div class="assemble" data-assemble>
+          <article class="layer layer--wire"><p class="eyebrow">01 · Structure</p><h2>The frame</h2><div class="wire-box" aria-hidden="true"></div></article>
+          <article class="layer layer--story"><p class="eyebrow">02 · Story</p><h2>The page</h2><div class="shot-block" aria-hidden="true"></div></article>
+          <article class="layer layer--launch"><p class="eyebrow">03 · Launch</p><h2>The site</h2><span class="browser-action">Open</span></article>
+        </div>
+      </div>
+    </section>
+    <section class="stack container" aria-labelledby="website-capabilities">
+      <div class="section-head"><div><p class="eyebrow">Designed around decisions</p><h2 id="website-capabilities">From focused launches to complete storefronts.</h2></div><p>The scope follows the job. No framework or commerce platform is chosen before the requirements are understood.</p></div>
+      <div class="capability-grid">
+        <article class="capability"><h3>Business Websites</h3><p>Clear positioning, services, work and contact journeys.</p></article>
+        <article class="capability"><h3>Ecommerce</h3><p>Product discovery, brand storytelling and purchase paths.</p></article>
+        <article class="capability"><h3>Landing Pages</h3><p>Campaign pages with one clear action.</p></article>
+        <article class="capability"><h3>Custom Applications</h3><p>Portals, dashboards, booking tools and purpose-built interfaces.</p></article>
+        <article class="capability"><h3>Thoughtful Redesigns</h3><p>Stronger hierarchy without discarding a working system by reflex.</p></article>
+        <article class="capability"><h3>Launch Foundations</h3><p>Responsive QA, accessibility, metadata, performance and handover.</p></article>
+      </div>
+    </section>`,
 });
 
 const automations = page({
   title: 'AI & Business Automation',
-  description: 'B Socio plans and builds practical AI assistants, enquiry workflows and business automations with human handoff.',
+  description: 'B Socio plans enquiry workflows, follow-ups and practical AI automation with a human handoff.',
   pathName: '/automations',
+  pageClass: 'page-automation',
   body: `
-    <section class="container page-hero"><div><p class="eyebrow">AI &amp; Automation</p><h1>Less repetitive work. More visible next steps.</h1></div><div><p>We map the real workflow first, then introduce automation only where it can be tested, monitored and handed back to a person.</p><div class="button-row"><a class="button" href="/contact">Map a Workflow</a></div></div></section>
-    <section class="section section--dark" aria-labelledby="automation-capabilities"><div class="container"><div class="section-heading"><div><p class="eyebrow">Capabilities</p><h2 id="automation-capabilities">Practical systems, not automation theatre.</h2></div><div><p>External services, model providers and data connections require an access, cost and reliability review before implementation.</p></div></div><div class="principles-grid"><article class="principle"><span>01</span><h3>Enquiry Workflows</h3><p>Validate, route and record incoming requests with clear ownership.</p></article><article class="principle"><span>02</span><h3>Follow-ups</h3><p>Coordinate reminders and next steps without relying on memory.</p></article><article class="principle"><span>03</span><h3>Knowledge Assistants</h3><p>Answer from approved information and provide a clear human handoff.</p></article><article class="principle"><span>04</span><h3>Connected Tools</h3><p>Join forms, inboxes, sheets, calendars and CRMs after provider review.</p></article><article class="principle"><span>05</span><h3>Internal Interfaces</h3><p>Give teams a calmer view of requests, records and actions.</p></article><article class="principle"><span>06</span><h3>Exception Paths</h3><p>Plan validation, retries and manual recovery before launch.</p></article></div></div></section>
-    <section class="section" aria-labelledby="automation-boundaries"><div class="container about-split"><h2 id="automation-boundaries">Clear about what needs access.</h2><div class="about-copy"><p>CRM, calendar, messaging, payments, AI models and reporting platforms each have their own credentials, permissions, costs and limitations.</p><p>We confirm those conditions before treating an integration as part of the delivery.</p><a class="text-link" href="/contact">Discuss Your Workflow <span class="arrow" aria-hidden="true">↗</span></a></div></div></section>`,
+    <section class="page-intro" aria-labelledby="automation-hero">
+      <div class="container">
+        <p class="eyebrow">AI automation</p>
+        <h1 id="automation-hero">Make the follow-through automatic.</h1>
+        <p class="lede">Capture enquiries, qualify, notify, schedule and keep things moving—with a person still accountable for the decision.</p>
+        <div class="button-row">
+          <a class="button" href="/contact">Start a project <span aria-hidden="true">↗</span></a>
+          <a class="button-ghost" href="/work">See our work</a>
+        </div>
+        <ol class="flow" data-flow aria-label="Enquiry workflow preview">
+          <li class="flow-step" data-step><span>01</span><h2>Enquiry</h2><p>A new request arrives with a name, need and contact path.</p></li>
+          <li class="flow-step" data-step><span>02</span><h2>Qualify</h2><p>The request is checked for fit before anyone spends a call on it.</p></li>
+          <li class="flow-step" data-step><span>03</span><h2>Notify</h2><p>The right person is told there is something ready to review.</p></li>
+          <li class="flow-step" data-step><span>04</span><h2>Schedule</h2><p>A time can be offered from the tools the business already uses.</p></li>
+          <li class="flow-step" data-step><span>05</span><h2>Complete</h2><p>The follow-up is marked done, or handed back when it needs a person.</p></li>
+        </ol>
+      </div>
+    </section>
+    <section class="benefit-row" aria-labelledby="moving-title">
+      <article class="benefit"><h2 id="moving-title">What keeps moving</h2><p>The workflow is designed to keep the next action visible.</p></article>
+      <article class="benefit"><h2>Less manual routing</h2><p>Capture and filter enquiries so the team sees the useful ones.</p></article>
+      <article class="benefit"><h2>A human handoff</h2><p>Assistants answer from approved information and pass on the rest.</p></article>
+    </section>
+    <section class="stack container" aria-labelledby="automation-boundaries">
+      <div class="section-head"><h2 id="automation-boundaries">Clear about what needs access.</h2><p>CRM, calendar, messaging, payments, AI models and reporting tools each have their own credentials, permissions, costs and limits. Those are confirmed before an integration is treated as part of the delivery.</p></div>
+      <div class="capability-grid">
+        <article class="capability"><h3>Enquiry workflows</h3><p>Validate, route and record incoming requests.</p></article>
+        <article class="capability"><h3>Follow-ups</h3><p>Coordinate reminders without relying on memory.</p></article>
+        <article class="capability"><h3>Knowledge assistants</h3><p>Answer from approved information, then hand off.</p></article>
+        <article class="capability"><h3>Connected tools</h3><p>Forms, inboxes, sheets, calendars and CRMs after review.</p></article>
+        <article class="capability"><h3>Internal interfaces</h3><p>A calmer view of requests, records and actions.</p></article>
+        <article class="capability"><h3>Exception paths</h3><p>Validation, retries and manual recovery before launch.</p></article>
+      </div>
+    </section>`,
 });
 
 const qrAr = page({
-  title: 'QR/AR Studio',
-  description: 'B Socio creates practical QR and augmented reality experiences for products, menus, spaces, packaging and events.',
+  title: 'QR + AR',
+  description: 'B Socio creates branded QR codes and labelled AR previews for products, menus, spaces, packaging and campaigns.',
   pathName: '/qr-ar-studio',
+  pageClass: 'page-qr',
   body: `
-    <section class="container page-hero"><div><p class="eyebrow">QR/AR Studio</p><h1>Let customers see more before they decide.</h1></div><div><p>Scan-to-open experiences for products, spaces and campaigns—used where an interactive preview makes the choice clearer.</p><div class="button-row"><a class="button" href="https://ar.bsocio.in" target="_blank" rel="noopener noreferrer">Visit AR Studio</a><a class="button button--outline" href="/contact">Plan an Experience</a></div></div></section>
-    <section class="section section--dark" aria-labelledby="ar-uses"><div class="container"><div class="section-heading"><div><p class="eyebrow">Relevant Uses</p><h2 id="ar-uses">A useful layer between the physical and digital.</h2></div><div><p>The format follows the object and the customer decision, not the novelty of the technology.</p></div></div><div class="principles-grid"><article class="principle"><span>01</span><h3>Products</h3><p>Reveal details, variations or contextual previews from packaging and displays.</p></article><article class="principle"><span>02</span><h3>Spaces</h3><p>Preview furniture, property ideas or installations in context.</p></article><article class="principle"><span>03</span><h3>Menus &amp; Catalogues</h3><p>Connect printed material to richer, updateable product information.</p></article><article class="principle"><span>04</span><h3>Events</h3><p>Add guided information or interactive campaign moments.</p></article><article class="principle"><span>05</span><h3>Packaging</h3><p>Extend a physical product with instructions, stories or digital content.</p></article><article class="principle"><span>06</span><h3>Campaigns</h3><p>Build a measurable scan-to-experience journey around a clear action.</p></article></div></div></section>`,
+    <section class="band band--cobalt page-intro" aria-labelledby="qr-hero">
+      <div class="container" data-switch-root>
+        <div class="split">
+          <div>
+            <p class="eyebrow">QR + AR</p>
+            <h1 id="qr-hero">Turn physical moments into digital action.</h1>
+            <p class="lede">Branded QR codes and AR previews that connect a printed object to a page, a product or a next step.</p>
+            <div class="button-row">
+              <a class="button button--light" href="/contact">Start a project <span aria-hidden="true">↗</span></a>
+              <a class="button-ghost" href="/work">See our work</a>
+            </div>
+            <div class="mode-switch" data-switch role="group" aria-label="Experience mode">
+              <button type="button" data-switch-value="qr" aria-pressed="true">QR Experiences</button>
+              <button type="button" data-switch-value="ar" aria-pressed="false">AR Experiences</button>
+            </div>
+          </div>
+          <div>
+            <div data-panel="qr" class="qr-layout">
+              <div class="qr-stage qr-card is-settled" data-scan>
+                <div class="qr-pattern" aria-hidden="true">${decorativeQr()}</div>
+                <span class="scan-line" aria-hidden="true"></span>
+                <p id="qr-note">Preview pattern, not a live code.</p>
+              </div>
+              <div class="phone-preview">
+                <div class="phone-screen">
+                  <p class="eyebrow">Revealed page</p>
+                  <h2>The scan opens a page.</h2>
+                  <p>Menu, product, campaign or lead capture—shown here as a preview, not a camera session.</p>
+                  <span class="browser-action">Act</span>
+                </div>
+              </div>
+            </div>
+            <div data-panel="ar">
+              <div class="ar-stage" data-switch-root>
+                <p class="eyebrow">Interactive preview</p>
+                <div class="ar-card"><strong>Printed card</strong><p>The physical object stays in view. Nothing here requests camera access.</p></div>
+                <div class="overlay-switch" data-switch role="group" aria-label="AR overlay example">
+                  <button type="button" data-switch-value="product" aria-pressed="true">Product</button>
+                  <button type="button" data-switch-value="place" aria-pressed="false">Place</button>
+                  <button type="button" data-switch-value="campaign" aria-pressed="false">Campaign</button>
+                </div>
+                <div class="ar-overlay" data-overlay-copy="product"><h2>Product</h2><p>Details, variants or a buying path anchored to the object.</p></div>
+                <div class="ar-overlay" data-overlay-copy="place"><h2>Place</h2><p>A space, installation or property note shown beside the print.</p></div>
+                <div class="ar-overlay" data-overlay-copy="campaign"><h2>Campaign</h2><p>A short story and one action, tied to the poster or pack.</p></div>
+              </div>
+              <p>This is an interactive preview, not live browser AR. The same three layers—product, place and campaign—are written out above so they remain available without animation or a camera.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="stack container" aria-labelledby="qr-steps">
+      <h2 id="qr-steps" class="visually-hidden">How a QR experience is used</h2>
+      <div class="use-grid">
+        <article class="use-card"><h3>1. Scan</h3><p>A simple scan with any camera app. The pattern on this page is decorative and is not a working code.</p></article>
+        <article class="use-card"><h3>2. Reveal</h3><p>A page opens with the product, menu, place or campaign.</p></article>
+        <article class="use-card"><h3>3. Act</h3><p>The visit ends in an enquiry, a choice or a sale.</p></article>
+      </div>
+      <div class="capability-grid">
+        <article class="capability"><h3>Menus</h3><p>Printed menus that open current dishes and details.</p></article>
+        <article class="capability"><h3>Products</h3><p>Packaging that reveals variants, instructions or a story.</p></article>
+        <article class="capability"><h3>Campaigns</h3><p>Posters that land on one clear action.</p></article>
+        <article class="capability"><h3>Lead capture</h3><p>A scan that starts an enquiry instead of a dead end.</p></article>
+      </div>
+      <div class="button-row">
+        <a class="button" href="/contact">Discuss a branded QR project</a>
+        <a class="button-ghost" href="https://ar.bsocio.in" target="_blank" rel="noopener noreferrer">Open the AR studio</a>
+      </div>
+    </section>`,
 });
 
 const work = page({
   title: 'Selected Work',
-  description: 'Explore real B Socio client work and clearly labelled digital product and automation concepts.',
+  description: 'B Socio work directions for websites, automation and QR/AR. Concepts are labelled, and client results are shown only when they can be verified.',
   pathName: '/work',
+  pageClass: 'page-work',
   body: `
-    <section class="container page-hero"><div><p class="eyebrow">Work</p><h1>Real work first. Concepts labelled.</h1></div><div><p>The portfolio separates published client work from demonstrations, so the evidence stays clear.</p></div></section>
-    <section class="section section--ruled" aria-label="Portfolio projects"><div class="container work-grid">
-      <article class="work-card work-card--featured" data-reveal><a class="work-card-media" href="/work/rehmat-panjab"><img src="${imagePath}" width="1265" height="713" alt="Rehmat Panjab ecommerce homepage featuring Oud Rose perfume oil" loading="lazy" decoding="async"></a><div class="work-card-head"><div><h2>Rehmat Panjab</h2><p>An ecommerce fragrance experience bringing product discovery, brand storytelling and a curated collection of concentrated perfume oils together.</p><div class="project-meta"><span>Ecommerce</span><span>Fragrance Website</span><span>Next.js</span></div></div><span class="label label--real">Live Project</span></div><a class="text-link" href="/work/rehmat-panjab">Read Case Study <span class="arrow" aria-hidden="true">↗</span></a></article>
-      <article class="work-card" data-reveal><div class="concept-visual" aria-hidden="true"><span>01 / ENQ</span></div><div class="work-card-head"><div><h3>Service Enquiry Workspace</h3><p>A landing page and lead workspace concept for turning an unstructured enquiry into a review-ready record.</p></div><span class="label">Concept</span></div></article>
-      <article class="work-card" data-reveal><div class="concept-visual" aria-hidden="true"><span>02 / OPS</span></div><div class="work-card-head"><div><h3>Operations Portal</h3><p>A calm internal-tool concept for tracking requests, ownership, documents and next actions.</p></div><span class="label">Concept</span></div></article>
-    </div></section>
-    <section class="section--signal"><div class="container cta-band"><h2>Ready to make the next case study real?</h2><div><p>Bring the business need, the existing constraints and the outcome you want to make possible.</p><div class="button-row"><a class="button" href="/contact">Start a Project</a></div></div></div></section>`,
+    <section class="page-intro">
+      <div class="container">
+        <p class="eyebrow">Our work</p>
+        <div class="section-head">
+          <h1>Directions, labelled clearly.</h1>
+          <div class="filters" data-filter-group role="group" aria-label="Filter work">
+            <button type="button" data-filter="all" aria-pressed="true">All</button>
+            <button type="button" data-filter="websites" aria-pressed="false">Websites</button>
+            <button type="button" data-filter="automation" aria-pressed="false">Automation</button>
+            <button type="button" data-filter="qr" aria-pressed="false">QR + AR</button>
+            <button type="button" data-filter="concept" aria-pressed="false">Concepts</button>
+          </div>
+        </div>
+        <p class="lede">Published client projects are added only when they can be shown accurately. The tiles below open real services, a client-neutral engagement shape, or labelled concepts.</p>
+        <div class="bento">
+          <a class="tile tile--feature" href="/websites" data-kind="websites"><span class="tile-media"><p class="eyebrow">Websites</p><h2>Websites built to move people.</h2><p>Structure, story and launch, designed around a decision.</p></span><span class="tile-ribbon" aria-hidden="true"></span><span>Explore websites</span></a>
+          <a class="tile" href="/automations" data-kind="automation"><span class="tile-media"><p class="eyebrow">Automation</p><h2>Follow-through, made visible.</h2><p>Enquiry to completion, with a person still accountable.</p></span><span class="tile-ribbon" aria-hidden="true"></span><span>Explore automation</span></a>
+          <a class="tile tile--cobalt" href="/qr-ar-studio" data-kind="qr"><span class="tile-media"><p class="eyebrow">QR + AR</p><h2>From a scan to an action.</h2><p>Printed moments that open a page. Previews are labelled as previews.</p></span><span class="tile-ribbon" aria-hidden="true"></span><span>Explore QR + AR</span></a>
+          <a class="tile" href="/work/engagement" data-kind="engagement"><span class="tile-media"><span class="label">Not a client project</span><p class="eyebrow">Engagement shape</p><h2>From presence to progress.</h2><p>How a website and automation engagement is structured. No client result is claimed here.</p></span><span class="tile-ribbon" aria-hidden="true"></span><span>Read the shape</span></a>
+          <a class="tile" href="/work#concepts" data-kind="concept"><span class="tile-media"><span class="label">Concept</span><h2>Service Enquiry Workspace</h2><p>A concept for turning an unstructured enquiry into a review-ready record.</p></span><span class="tile-ribbon" aria-hidden="true"></span></a>
+          <a class="tile" href="/work#concepts" data-kind="concept"><span class="tile-media"><span class="label">Concept</span><h2>Operations Portal</h2><p>A concept for tracking requests, ownership and next actions.</p></span><span class="tile-ribbon" aria-hidden="true"></span></a>
+        </div>
+        <div id="concepts" class="stack">
+          <h2>Concepts stay labelled.</h2>
+          <p>Service Enquiry Workspace and Operations Portal are studies, not completed client projects.</p>
+        </div>
+      </div>
+    </section>`,
 });
 
-const caseStudySchema = {
-  '@context': 'https://schema.org',
-  '@type': 'CreativeWork',
-  name: 'Rehmat Panjab Ecommerce Website',
-  creator: { '@type': 'Organization', name: 'B Socio', url: canonicalOrigin },
-  url: `${canonicalOrigin}/work/rehmat-panjab`,
-  about: 'Ecommerce fragrance website for Rehmat Panjab',
-  image: `${canonicalOrigin}${imagePath}`,
-};
-
-const rehmatPanjab = page({
-  title: 'Rehmat Panjab Case Study',
-  description: 'A B Socio case study for Rehmat Panjab, an ecommerce fragrance experience for concentrated perfume oils.',
-  pathName: '/work/rehmat-panjab',
-  preloadImage: true,
-  ogType: 'article',
-  socialImage: imagePath,
-  socialImageAlt: 'Rehmat Panjab ecommerce homepage featuring Oud Rose perfume oil',
-  socialImageWidth: 1265,
-  socialImageHeight: 713,
-  schema: caseStudySchema,
+const engagement = page({
+  title: 'How an engagement is shaped',
+  description: 'A client-neutral view of how B Socio structures a website and automation engagement. This page is not a published client result.',
+  pathName: '/work/engagement',
+  pageClass: 'page-engagement',
   body: `
-    <article>
-      <header class="container case-hero">
-        <div class="case-hero-top"><div><p class="eyebrow">Live Project · Ecommerce / Fragrance</p><h1>Rehmat Panjab</h1></div><div><p class="case-hero-summary">An ecommerce fragrance experience that brings product discovery, brand storytelling and a curated collection of concentrated perfume oils together.</p><div class="button-row"><a class="button" href="https://www.rehmatpanjab.com" target="_blank" rel="noopener noreferrer">View Live Website</a></div></div></div>
-        <figure class="case-hero-media"><img src="${imagePath}" width="1265" height="713" alt="Rehmat Panjab homepage showing Oud Rose perfume oil, fragrance notes and product actions" decoding="async" fetchpriority="high"><figcaption><span>Rehmat Panjab homepage</span><span>Captured 24 October 2026</span></figcaption></figure>
-        <nav aria-label="Case study sections"><ol class="case-index"><li><a href="#overview">01 Overview</a></li><li><a href="#experience">02 Experience</a></li><li><a href="#features">03 Features</a></li><li><a href="#design">04 Design</a></li><li><a href="#contribution">05 Contribution</a></li><li><a href="#technology">06 Technology</a></li></ol></nav>
-      </header>
-      <div class="container">
-        <section class="case-section" id="overview" aria-labelledby="overview-title"><header><span>01</span><h2 id="overview-title">Project Overview</h2></header><div class="case-content"><p>Rehmat Panjab is a Punjab-based perfume-oil house. Its public website presents concentrated fragrances for everyday wear, gifting and memorable occasions, with product information grounded in notes, mood and occasion.</p><dl class="fact-list"><div><dt>Project</dt><dd>Rehmat Panjab</dd></div><div><dt>Category</dt><dd>Ecommerce / Fragrance Website</dd></div><div><dt>Status</dt><dd>Live</dd></div><div><dt>Market</dt><dd>India</dd></div></dl></div></section>
-        <section class="case-section" id="experience" aria-labelledby="experience-title"><header><span>02</span><h2 id="experience-title">Brand &amp; Website Experience</h2></header><div class="case-content"><p>The experience treats fragrance as atmosphere and personal ritual rather than a conventional product grid. An editorial homepage introduces a daily fragrance, its notes and an immediate path into the collection.</p><p>Customers can begin with testers, browse the house, use guided scent discovery or move directly into product detail and purchase paths.</p></div></section>
-        <section class="case-section" id="features" aria-labelledby="features-title"><header><span>03</span><h2 id="features-title">Key Features</h2></header><div class="case-content"><ul class="feature-list"><li><strong>Product Discovery</strong><span>Collection browsing, product pages and visible size and availability information.</span></li><li><strong>Guided Choice</strong><span>A scent finder and Rehmat AI entry point organized around mood, occasion and fragrance family.</span></li><li><strong>Tester Journey</strong><span>Individual 3 ml testers and build-your-own set pathways for lower-commitment discovery.</span></li><li><strong>Commerce</strong><span>Cart actions, live offers and product variants are visible in the public experience.</span></li><li><strong>Fragrance Education</strong><span>Top, heart and base notes are explained through product content and published guides.</span></li></ul></div></section>
-        <section class="case-section" id="design" aria-labelledby="design-title"><header><span>04</span><h2 id="design-title">Design &amp; Development</h2></header><div class="case-content"><p>A dark green, cream and copper palette supports a premium fragrance position. High-contrast serif typography, detailed product imagery and ingredient notes give the collection a distinctive editorial voice.</p><p>The public interface adapts across navigation, product discovery and purchasing flows, includes semantic headings and labels, and provides motion controls for the cinematic hero scene.</p></div></section>
-        <section class="case-section" id="contribution" aria-labelledby="contribution-title"><header><span>05</span><h2 id="contribution-title">B Socio’s Contribution</h2></header><div class="case-content"><p>B Socio created the Rehmat Panjab website experience. The recovered B Socio repository does not contain the original project records, so this public case study intentionally does not claim a more detailed role split, timeline or measured business result.</p></div></section>
-        <section class="case-section" id="technology" aria-labelledby="technology-title"><header><span>06</span><h2 id="technology-title">Technology Stack</h2></header><div class="case-content"><p>The publicly served markup confirms a Next.js frontend. Hosting, database, CMS, payment services and private infrastructure are not identified here because they cannot be verified from the public interface alone.</p><div class="button-row"><a class="button" href="https://www.rehmatpanjab.com" target="_blank" rel="noopener noreferrer">View Live Website</a><a class="button button--outline" href="/contact">Discuss a Similar Project</a></div></div></section>
+    <section class="page-intro">
+      <div class="container split">
+        <div>
+          <p class="eyebrow">Engagement shape · not a client case study</p>
+          <h1>From presence to progress.</h1>
+          <p class="lede">A client-neutral view of how a website and an automation system can be shaped together. It does not describe a named client or a measured result.</p>
+          <div class="button-row"><a class="button" href="/contact">Start a project <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <div class="hero-stage" data-draw-stage aria-hidden="true">
+          <svg class="hero-ribbon" viewBox="0 0 640 360" fill="none">
+            <path data-draw d="M40 220 C 180 220, 220 80, 520 110" stroke="#2f6bff" stroke-width="16" stroke-linecap="round"/>
+          </svg>
+        </div>
       </div>
-    </article>`,
+    </section>
+    <div class="container chapter-layout">
+      <nav class="reading-rail" data-spine aria-label="On this page">
+        <a href="#challenge">Challenge</a>
+        <a href="#system">System</a>
+        <a href="#outcome">Outcome</a>
+      </nav>
+      <div>
+        <section class="chapter" id="challenge" aria-labelledby="challenge-title">
+          <div class="chapter-copy"><h2 id="challenge-title">Challenge</h2><p>A strong offer can still be hard to find, understand and follow up. The useful starting point is the gap between the public site and the work behind it.</p></div>
+        </section>
+        <section class="chapter" id="system" aria-labelledby="system-title-chapter">
+          <div class="chapter-copy"><h2 id="system-title-chapter">System</h2><p>Websites, enquiry handling and a clear next action, connected only where the workflow, access and cost have been reviewed. Nothing here is presented as a finished client build.</p></div>
+        </section>
+        <section class="chapter" id="outcome" aria-labelledby="outcome-title">
+          <div class="chapter-copy"><h2 id="outcome-title">Outcome</h2><p>The intended result is a clearer presence and a follow-through the team can run. Measured results are published only when they belong to a real project that can be shown accurately.</p></div>
+        </section>
+      </div>
+    </div>`,
 });
 
 const about = page({
   title: 'About',
-  description: 'B Socio is an independent digital studio in Punjab designing websites, ecommerce experiences and practical business automations.',
+  description: 'B Socio is an independent studio in Punjab combining websites, automation and digital growth in one working relationship.',
   pathName: '/about',
+  pageClass: 'page-about',
   body: `
-    <section class="container page-hero"><div><p class="eyebrow">About B Socio</p><h1>Design and development, close to the work.</h1></div><div><p>B Socio is an independent digital studio in Punjab, India, bringing websites, ecommerce, automation and digital growth into one practical working relationship.</p></div></section>
-    <section class="section section--dark" aria-labelledby="about-belief"><div class="container about-split"><h2 id="about-belief">The useful answer is usually specific.</h2><div class="about-copy"><p>We begin with the audience, workflow and constraints—not a trend, a framework or a list of features.</p><p>That keeps the work focused on what customers need to understand and what the team needs to operate.</p></div></div></section>
-    <section class="section" aria-labelledby="principles"><div class="container"><div class="section-heading"><div><p class="eyebrow">Principles</p><h2 id="principles">A straightforward way to work.</h2></div><div><p>Clear scope, reviewable decisions and honest boundaries from discovery through handover.</p></div></div><div class="principles-grid"><article class="principle"><span>01</span><h3>Human-led</h3><p>Automation supports judgment; it does not replace accountability.</p></article><article class="principle"><span>02</span><h3>Evidence first</h3><p>Real work is labelled clearly. Results and technologies are never invented.</p></article><article class="principle"><span>03</span><h3>Built to hand over</h3><p>The finished system should be understandable to the people who own it.</p></article></div></div></section>`,
+    <section class="page-intro" aria-labelledby="about-hero">
+      <div class="container about-grid">
+        <div>
+          <p class="eyebrow">About</p>
+          <h1 id="about-hero">Small team. Systems thinking.</h1>
+          <p class="lede">B Socio is an independent digital studio in Punjab, India. We combine websites, ecommerce, automation and digital growth in one practical working relationship.</p>
+          <div class="button-row">
+            <a class="button" href="/contact">Start a project <span aria-hidden="true">↗</span></a>
+            <a class="button-ghost" href="/work">Our work</a>
+          </div>
+        </div>
+        <div class="sketch-board" data-draw-stage>
+          <svg class="sketch-line" viewBox="0 0 640 420" fill="none" aria-hidden="true">
+            <path data-draw d="M90 120 C 180 150, 240 180, 330 210" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round"/>
+            <path data-draw d="M360 230 C 430 250, 480 280, 560 300" stroke="#1d4ed8" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <article class="note note--clarity" data-parallax="0.03"><h2>Clarity</h2><p>Understand the opportunity before choosing a tool.</p></article>
+          <article class="note note--craft" data-parallax="-0.02"><h2>Craft</h2><p>Design and build the part people actually use.</p></article>
+          <article class="note note--momentum" data-parallax="0.04"><h2>Momentum</h2><p>Automate the follow-through and keep it moving.</p></article>
+        </div>
+      </div>
+    </section>
+    <section class="method-row" aria-labelledby="method-title">
+      <h2 id="method-title" class="visually-hidden">How we work</h2>
+      <article class="method"><h3>Clarity</h3><p>Audience, workflow and constraints come before a feature list.</p></article>
+      <article class="method"><h3>Craft</h3><p>The interface is built to be understood, reviewed and handed over.</p></article>
+      <article class="method"><h3>Momentum</h3><p>Automation supports judgment. It does not replace accountability.</p></article>
+    </section>
+    <section class="stack container">
+      <h2>Real work is labelled clearly.</h2>
+      <p>Results and technologies are not invented. A concept stays a concept until a real project can be shown.</p>
+    </section>`,
 });
 
 const contact = page({
   title: 'Start a Project',
-  description: 'Tell B Socio about your website, ecommerce, automation, branding or QR/AR project.',
+  description: 'Send B Socio a website, ecommerce, automation, branding or QR/AR enquiry by email or WhatsApp.',
   pathName: '/contact',
+  pageClass: 'page-contact',
   body: `
-    <section class="container page-hero"><div><p class="eyebrow">Start a Project</p><h1>Tell us what needs to work better.</h1></div><div><p>Share the business context, the current friction and the outcome you want. We will reply with a useful next step.</p></div></section>
-    <section class="section section--ruled"><div class="container contact-layout">
-      <aside class="contact-aside"><h2>Direct, simple contact.</h2><p>This form opens your own email app or WhatsApp. Your enquiry is not stored by this website.</p><div class="contact-details"><a href="mailto:connect@bsocio.in">connect@bsocio.in</a><a href="https://wa.me/919781580475" target="_blank" rel="noopener noreferrer">+91 97815 80475</a><span>Punjab, India</span></div></aside>
-      <form class="inquiry-form" data-inquiry-form>
-        <div class="field-grid">
-          <div class="field"><label for="name">Name</label><input id="name" name="name" autocomplete="name" maxlength="80" required></div>
-          <div class="field"><label for="business">Business Name</label><input id="business" name="business" autocomplete="organization" maxlength="120"></div>
-          <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" maxlength="254" required></div>
-          <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+91 …" maxlength="32"></div>
-          <div class="field field--wide"><label for="service">What do you need?</label><select id="service" name="service" required><option value="">Select a service</option><option>Website Development &amp; Ecommerce</option><option>AI &amp; Business Automation</option><option>Branding &amp; Digital Growth</option><option>QR/AR Experience</option><option>Not sure yet</option></select></div>
-          <div class="field field--wide"><label for="message">Project Details</label><textarea id="message" name="message" placeholder="What should the project make easier? …" aria-describedby="message-help" maxlength="2000" required></textarea><small id="message-help">Include useful context, existing links and any fixed launch constraints. Maximum 2,000 characters.</small></div>
-        </div>
-        <div class="button-row"><button class="button" type="submit">Send by Email</button><button class="button button--outline" type="button" data-whatsapp-submit>Send on WhatsApp</button></div>
-        <p class="form-note">Email and WhatsApp open external applications. Their own privacy terms apply.</p>
-        <p class="form-status" aria-live="polite" data-form-status></p>
-      </form>
-    </div></section>`,
+    <section class="page-intro">
+      <div class="container contact-split">
+        <aside class="contact-aside">
+          <p class="eyebrow">Contact</p>
+          <h1>Let’s build what happens next.</h1>
+          <p class="lede">Tell us a little about the project. This form opens your email app or WhatsApp. The website does not store the message.</p>
+          <div class="contact-chips">
+            <a class="contact-chip" href="mailto:connect@bsocio.in">connect@bsocio.in</a>
+            <a class="contact-chip" href="${whatsappUrl}" target="_blank" rel="noopener noreferrer">WhatsApp · ${phoneDisplay}</a>
+          </div>
+          <p>Punjab, India</p>
+        </aside>
+        <form class="inquiry-form" data-inquiry-form data-whatsapp="917009464475">
+          <div class="form-progress" aria-hidden="true"><span data-progress-bar></span></div>
+          <div class="field-grid">
+            <div class="field field--wide"><label for="name">Name</label><input id="name" name="name" autocomplete="name" maxlength="80" required></div>
+            <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" inputmode="email" autocomplete="email" spellcheck="false" maxlength="254" required></div>
+            <div class="field"><label for="phone">Phone</label><input id="phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+91 …" maxlength="32"></div>
+            <div class="field field--wide"><label for="business">Company</label><input id="business" name="business" autocomplete="organization" maxlength="120"></div>
+            <div class="field field--wide"><label for="service">What do you need?</label><select id="service" name="service" required><option value="">Select a service</option><option>Website Development &amp; Ecommerce</option><option>AI &amp; Business Automation</option><option>Branding &amp; Digital Growth</option><option>QR/AR Experience</option><option>Not sure yet</option></select></div>
+            <div class="field field--wide"><label for="message">Project details</label><textarea id="message" name="message" placeholder="Tell us about your project…" aria-describedby="message-help" maxlength="2000" required></textarea><small id="message-help">Include useful context, existing links and any fixed launch constraints. Maximum 2,000 characters.</small></div>
+          </div>
+          <div class="button-row">
+            <button class="button" type="submit">Send enquiry <span aria-hidden="true">↗</span></button>
+            <button class="button-ghost" type="button" data-whatsapp-submit>Send on WhatsApp</button>
+          </div>
+          <p class="form-note">Email and WhatsApp open external applications. Their own privacy terms apply.</p>
+          <p class="form-status" aria-live="polite" data-form-status></p>
+        </form>
+      </div>
+    </section>
+    <section class="stack container faq" aria-labelledby="faq-title">
+      <h2 id="faq-title">Common questions</h2>
+      <div class="faq-grid">
+        <details><summary>What types of projects do you take on?</summary><p>Websites and ecommerce, AI and business automation, branding and digital growth, and QR/AR experiences.</p></details>
+        <details><summary>What happens after I send an enquiry?</summary><p>The form opens your own email app or WhatsApp with the message prepared. This website does not store it.</p></details>
+        <details><summary>Do you publish client results?</summary><p>Only when a real project can be shown accurately. Concepts on the work page are labelled as concepts.</p></details>
+      </div>
+    </section>`,
 });
 
 const privacy = page({
   title: 'Privacy',
-  description: 'Privacy information for the B Socio website and project enquiry contact options.',
+  description: 'How the B Socio website handles browsing and project enquiries sent through email or WhatsApp.',
   pathName: '/privacy',
+  pageClass: 'page-privacy',
   body: `
-    <section class="container page-hero"><div><p class="eyebrow">Privacy</p><h1>A simple website with minimal data collection.</h1></div><div><p>This page explains what happens when you browse the B Socio website or choose to contact the studio.</p></div></section>
-    <section class="section section--ruled"><div class="container legal-copy"><p><strong>Last updated:</strong> 24 October 2026</p><h2>Website browsing</h2><p>This static website does not set optional advertising cookies or run a customer tracking script in its source code.</p><h2>Project enquiries</h2><p>The project form prepares a message and opens your email application or WhatsApp. The website itself does not store the form contents. Information you choose to send is handled through the selected service and used to respond to your enquiry.</p><h2>External websites</h2><p>Links to Rehmat Panjab, B Socio AR, WhatsApp and the private studio open third-party services with their own privacy practices.</p><h2>Contact</h2><p>For privacy questions, email <a href="mailto:connect@bsocio.in">connect@bsocio.in</a>.</p></div></section>`,
+    <section class="page-intro">
+      <div class="container privacy-layout">
+        <nav class="reading-rail" data-spine aria-label="On this page">
+          <a href="#overview">Overview</a>
+          <a href="#collect">Information we collect</a>
+          <a href="#use">How we use it</a>
+          <a href="#choices">Your choices</a>
+          <a href="#privacy-contact">Contact</a>
+        </nav>
+        <div>
+          <p class="eyebrow">Privacy</p>
+          <h1>Privacy, in plain language.</h1>
+          <p class="lede">We keep this simple, so you can understand what this website does and what it does not do.</p>
+          <p><strong>Updated 25 October 2026</strong></p>
+          <section class="chapter" id="overview" aria-labelledby="overview-title"><div class="chapter-copy"><h2 id="overview-title">Overview</h2><p>This static website does not set optional advertising cookies or run a customer tracking script in its source code.</p></div></section>
+          <section class="chapter" id="collect" aria-labelledby="collect-title"><div class="chapter-copy"><h2 id="collect-title">Information we collect</h2><p>If you use the project form, you choose what to include. The website prepares that message and opens your email application or WhatsApp. It does not store the form contents.</p></div></section>
+          <section class="chapter" id="use" aria-labelledby="use-title"><div class="chapter-copy"><h2 id="use-title">How we use it</h2><p>Information you choose to send is handled by the email or WhatsApp service you open, and is used to respond to your enquiry. We do not sell personal information from this website.</p></div></section>
+          <section class="chapter" id="choices" aria-labelledby="choices-title"><div class="chapter-copy"><h2 id="choices-title">Your choices</h2><p>You can contact us by email or WhatsApp, and you can ask for a correction or deletion of information you have sent us.</p></div></section>
+          <section class="chapter" id="privacy-contact" aria-labelledby="privacy-contact-title"><div class="chapter-copy"><h2 id="privacy-contact-title">Contact</h2><p>Links to B Socio AR and WhatsApp open third-party services with their own privacy practices. For privacy questions, email <a href="mailto:connect@bsocio.in">connect@bsocio.in</a>.</p></div></section>
+        </div>
+      </div>
+    </section>`,
 });
 
 const notFound = page({
   title: 'Page Not Found',
   description: 'The requested B Socio page could not be found.',
   pathName: '/404',
+  pageClass: 'page-404',
   robots: 'noindex, follow',
-  body: `<section class="container not-found"><div><strong aria-hidden="true">404</strong><h1>That page is not here.</h1><p>The link may be out of date, or the page may have moved.</p><a class="button" href="/">Return Home</a></div></section>`,
+  body: `
+    <section class="not-found">
+      <svg class="not-found-ribbon" viewBox="0 0 980 220" fill="none" aria-hidden="true" data-draw-stage>
+        <path data-draw d="M40 120 C 180 20, 260 200, 420 110 S 680 20, 940 130" stroke="#2f6bff" stroke-width="22" stroke-linecap="round"/>
+      </svg>
+      <div>
+        <p class="not-found-code" aria-hidden="true">404</p>
+        <h1>This path went nowhere.</h1>
+        <p>Let’s get you moving again.</p>
+        <a class="button button--light" href="/">Back to home</a>
+      </div>
+    </section>`,
 });
 
 const pages = new Map([
@@ -418,21 +648,21 @@ const pages = new Map([
   ['automations/index.html', automations],
   ['qr-ar-studio/index.html', qrAr],
   ['work/index.html', work],
-  ['work/rehmat-panjab/index.html', rehmatPanjab],
+  ['work/engagement/index.html', engagement],
   ['about/index.html', about],
   ['contact/index.html', contact],
   ['privacy/index.html', privacy],
   ['404.html', notFound],
 ]);
 
-const sitemapPaths = ['/', '/services', '/websites', '/automations', '/qr-ar-studio', '/work', '/work/rehmat-panjab', '/about', '/contact', '/privacy'];
+const sitemapPaths = ['/', '/services', '/websites', '/automations', '/qr-ar-studio', '/work', '/work/engagement', '/about', '/contact', '/privacy'];
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemapPaths.map((pathName) => `  <url><loc>${canonicalOrigin}${pathName === '/' ? '' : pathName}</loc></url>`).join('\n')}
 </urlset>`;
 
 await rm(outputDirectory, { recursive: true, force: true });
-await mkdir(path.join(outputDirectory, 'assets', 'images', 'projects'), { recursive: true });
+await mkdir(path.join(outputDirectory, 'assets'), { recursive: true });
 
 for (const [relativePath, content] of pages) {
   const destination = path.join(outputDirectory, relativePath);
@@ -443,9 +673,9 @@ for (const [relativePath, content] of pages) {
 await cp(path.join(sourceDirectory, 'styles.css'), path.join(outputDirectory, 'assets', 'styles.css'));
 await cp(path.join(sourceDirectory, 'site.js'), path.join(outputDirectory, 'assets', 'site.js'));
 await cp(path.join(rootDirectory, 'assets', 'favicon.svg'), path.join(outputDirectory, 'assets', 'favicon.svg'));
+await cp(path.join(rootDirectory, 'assets', 'logo-b-socio.png'), path.join(outputDirectory, 'assets', 'logo-b-socio.png'));
 await cp(path.join(rootDirectory, 'assets', 'og-card.svg'), path.join(outputDirectory, 'assets', 'og-card.svg'));
 await cp(path.join(rootDirectory, 'assets', 'og-card.png'), path.join(outputDirectory, 'assets', 'og-card.png'));
-await cp(path.join(rootDirectory, 'assets', 'images', 'projects', 'rehmat-panjab-homepage.png'), path.join(outputDirectory, 'assets', 'images', 'projects', 'rehmat-panjab-homepage.png'));
 await writeFile(path.join(outputDirectory, 'sitemap.xml'), sitemap, 'utf8');
 await writeFile(path.join(outputDirectory, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${canonicalOrigin}/sitemap.xml\n`, 'utf8');
 
